@@ -23,16 +23,30 @@ class Viewport {
         SDL_Texture* fps_display;
 
         std::thread renderThread;
+        std::thread sceneObjectWindowThread;
+        bool sceneObjectWindowThreadOnline = false;
+
         uint FPS = 60;
         bool isOnBool = true;
 
     public:
         Viewport(Environment* env) : env(env), cam(env->cam) {};
 
+        static void windowThread(Viewport* viewport, SceneObject obj) {
+            viewport->window_runner = Gtk::Application::create();
+            SceneObjectWindow scene(&obj, viewport->cam);
+            viewport->window_runner->run(scene);
+            viewport->sceneObjectWindowThreadOnline = false;
+        }
+
         void run_window(SceneObject obj) {
-            window_runner = Gtk::Application::create();
-            SceneObjectWindow scene(&obj);
-            window_runner->run(scene);
+            if (sceneObjectWindowThreadOnline) {
+                window_runner->quit();
+                sceneObjectWindowThreadOnline = false;
+            }
+            sceneObjectWindowThreadOnline = true;
+            sceneObjectWindowThread = std::thread(windowThread, this, obj);
+            sceneObjectWindowThread.detach();
         }
 
         bool isOn() const {
@@ -59,6 +73,8 @@ class Viewport {
             TTF_CloseFont(font);
             SDL_DestroyRenderer(renderer);
             SDL_DestroyWindow(window);
+
+            window_runner->quit();
         }
 
         void updateTexture() {
@@ -178,7 +194,6 @@ class Viewport {
                             BVH bvh = viewport->env->BVHs[index];
                             viewport->run_window(bvh);
                             //bvh.addRelativeRotation(Vector<float>(0, 1, 0));
-                            bvh.cuda();
                             viewport->cam->reset_progressive_rendering();
                         }
                     }

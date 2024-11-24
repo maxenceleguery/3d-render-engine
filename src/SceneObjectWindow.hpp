@@ -12,6 +12,9 @@
 
 class SceneObjectWindow : public Gtk::Window {
     private:
+        SceneObject* obj;
+        Camera* cam;
+
         Gtk::Grid grid;
 
         std::vector<Gtk::Entry> offset;
@@ -39,12 +42,31 @@ class SceneObjectWindow : public Gtk::Window {
                 grid.attach(labels[i], 0, line*4+i+1);
                 entries[i].show();
                 entries[i].set_text(Glib::ustring(std::to_string(value[i])));
-                offset[i].set_editable(true);
+                entries[i].set_editable(true);
+                entries[i].signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &SceneObjectWindow::on_entry_changed), name));
                 grid.attach(entries[i], 2, line*4+i+1);
             }
         }
+
+        void on_entry_changed(const std::string& name) {
+            if (name == "Offset") {
+                Vector<float> offset_value = Vector<float>(std::atof(offset[0].get_text().c_str()), std::atof(offset[1].get_text().c_str()), std::atof(offset[2].get_text().c_str()));
+                obj->setAbsoluteOffset(offset_value);
+                offset_value.printCoord();
+            } else if (name == "Scale") {
+                Vector<float> scale_value = Vector<float>(std::atof(scale[0].get_text().c_str()), std::atof(scale[1].get_text().c_str()), std::atof(scale[2].get_text().c_str()));
+                obj->setAbsoluteScale(scale_value);
+                scale_value.printCoord();
+            } else if (name == "Rotation") {
+                //obj->set(Vector<float>(std::atof(rotation[0].get_text().c_str()), std::atof(rotation[1].get_text().c_str()), std::atof(rotation[2].get_text().c_str())));
+            }
+            obj->cuda();
+            cam->reset_progressive_rendering();
+            //std::cout << "Entry changed: " << entry->get_text() << std::endl;
+        }
+
     public:
-        SceneObjectWindow(SceneObject* obj) {
+        SceneObjectWindow(SceneObject* obj, Camera* cam) : obj(obj), cam(cam) {
             set_title("Scene Object");
             set_border_width(10);
             add(grid);

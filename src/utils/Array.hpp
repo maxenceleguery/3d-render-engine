@@ -89,11 +89,14 @@ class Array : public CudaReady {
                 }
             }
             if (data_gpu == nullptr) {
-                std::cout << "Allocating : " << human_rep(data_size*sizeof(T)) << std::endl;
+                std::cout << "Allocating : " << human_rep(data_size*sizeof(T));
                 //allocated_cuda_memory += data_size*sizeof(T);
-                cudaErrorCheck(cudaMalloc(&data_gpu, data_size*sizeof(T)));    
+                cudaErrorCheck(cudaMalloc(&data_gpu, data_size*sizeof(T)));
+                std::cout << " Done" << std::endl;
             }
+            //std::cout << "Copying to device.";
             cudaErrorCheck(cudaMemcpy(data_gpu, data_cpu, data_size*sizeof(T), cudaMemcpyHostToDevice));
+            //std::cout << " Done" << std::endl;
         }
 
         __host__ void cpu() override {
