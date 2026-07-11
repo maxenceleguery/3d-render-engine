@@ -1,4 +1,4 @@
-# 3D Render Engine
+# Jare (Just A Render Engine)
 
 3D render engine project in C++.
 Require a Nvidia graphic card to use CUDA acceleration.
