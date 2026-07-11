@@ -1,0 +1,21 @@
+.PHONY: all compile
+
+NVCC := nvcc
+CUDAFLAGS := -Wno-deprecated-gpu-targets
+LIBS=-lcublas -lcusolver
+LIBDIRS=-L/usr/local/cuda/include
+INCDIRS=-I cuda-samples/Common/
+BUILD := build/
+DEPS := read_csv preprocess_data evaluate_accuracy classifier_math cuda_stuff fmatrix
+
+all: linear_classif
+	./linear_classif
+
+$(BUILD):
+	mkdir $@
+
+$(BUILD)%.o: %.cu $(BUILD)
+	$(NVCC) $(CUDAFLAGS) -c $< -o $@ $(INCDIRS)
+
+linear_classif: $(DEPS:%=$(BUILD)%.o) linear_classification.cu
+	@$(NVCC) $(CUDAFLAGS) $^ -o linear_classif $(LIBDIRS) $(INCDIRS) $(LIBS)

@@ -149,8 +149,8 @@ class Camera : public SceneObject {
             */
 
             const float weight = 1.f / (num_images_rendered + 1);
-            pixels[index] = Pixel( (pixels[index].toVector() * (1 - weight) + color.toVector() * weight).clamp(0.f, 1.f) );
-           
+            //pixels[index] = Pixel( (pixels[index].toVector() * (1 - weight) + color.toVector() * weight).clamp(0.f, 1.f) );
+            pixels[index] = Pixel( (pixels[index].toVector() + (color.toVector() - pixels[index].toVector()) * weight).clamp(0.f, 1.f) );
         }
 
         __host__ __device__ CoordsPair indexToCoord(const uint index) const {

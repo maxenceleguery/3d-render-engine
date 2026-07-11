@@ -84,6 +84,7 @@ class Array : public CudaReady {
             if (data_size == 0) return;
 
             if constexpr (std::is_base_of<CudaReady, T>::value) {
+                // Maybe size() must be replace by data_size to handle reserved but no set memory
                 for (uint i=0; i<size(); i++) {
                     data_cpu[i].cuda();
                 }
